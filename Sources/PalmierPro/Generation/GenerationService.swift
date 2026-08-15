@@ -491,7 +491,7 @@ final class GenerationService {
             case .image: return "image/jpeg"
             case .video: return "video/mp4"
             case .audio: return "audio/mpeg"
-            case .text: return "application/octet-stream"
+            case .text, .subtitle: return "application/octet-stream"
             case .lottie: return "application/json"
             case .sequence: return "video/mp4"
             }
@@ -640,6 +640,7 @@ final class GenerationService {
             for placeholder in placeholders {
                 updateGenerationMetadata(placeholder, editor: editor, status: .failed(message)) { input in
                     input.backendJobId = backendJobId
+                    input.refundedCredits = job.refundedCredits
                 }
             }
             editor.onProjectCheckpointRequired?()

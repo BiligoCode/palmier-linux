@@ -109,7 +109,18 @@ extension EditorViewModel {
 
     private func applyingStaticSettings(from source: Clip, to target: Clip) -> Clip {
         var result = target
-        result.effects = source.effects
+        let blurTrack = target.blurKeyframeTrack
+        let effects: [Effect]? = source.effects?.compactMap { effect in
+            if source.mediaType == .text, effect.type == Effect.gaussianBlurType { return nil }
+            var effect = effect
+            effect.params = effect.params.mapValues { param in
+                var param = param
+                param.track = nil
+                return param
+            }
+            return effect
+        }
+        result.effects = effects?.isEmpty == false ? effects : nil
 
         switch source.mediaType {
         case .audio:
@@ -136,7 +147,11 @@ extension EditorViewModel {
             result.edgeRounding = source.edgeRounding
             result.edgeSoftness = source.edgeSoftness
             result.blendMode = source.blendMode
+        case .subtitle:
+            // Asset-only type; never a clip's mediaType.
+            break
         }
+        if let blurTrack { result.setBlurKeyframeTrack(blurTrack) }
         return result
     }
 }
